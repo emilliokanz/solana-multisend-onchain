@@ -18,20 +18,27 @@ use crate::{instruction::{MultisendInstruction, TransferDataPayload}, error::Mul
 pub struct Processor;
 impl Processor {
   pub fn process(program_id: &Pubkey, accounts: &[AccountInfo], instruction_data: &[u8]) -> ProgramResult {
+    msg!("Instruction data is ->> {:?}", instruction_data);
     // calling the instruction function to unpack the instruction data from entrypoint
     let instruction = MultisendInstruction::unpack(instruction_data)?;
 
+      
     match instruction {
         MultisendInstruction::TransferData { payload } => {
             msg!("Instruction: InitMultisend");
-            Self::process_init_multisend(program_id, accounts, payload)
+            Self::process_init_multisend(program_id, accounts, payload.addresses, payload.amounts)
         }
+        // MultisendInstruction::Addresses { value } => {
+        //   Self::process_init_multisend(program_id, accounts, payload)
+        // },
+        // MultisendInstruction::Amounts { value } => todo!(),
     }
 }
  pub fn process_init_multisend(
       program_id: &Pubkey,
       accounts: &[AccountInfo],
-      payload: TransferDataPayload,
+      addresses: Vec<String>,
+      amounts: Vec<u32>
   ) -> ProgramResult {
     // making initializer account, made &mut or mutable so it can be changed
       let account_info_iter = &mut accounts.iter();
@@ -44,7 +51,7 @@ impl Processor {
 
       let program_id = next_account_info(account_info_iter)?;
       
-      msg!("data: {:?}", payload);
+      msg!("data: {:?}", addresses);
 
       Ok(())
   }
